@@ -2,7 +2,7 @@ import math
 import torch
 from torch import nn as nn
 from torch.nn import functional as F
-
+import sys
 from basicsr.utils.registry import ARCH_REGISTRY
 from .arch_util import flow_warp
 
@@ -69,12 +69,20 @@ class SpyNet(nn.Module):
             if upsampled_flow.size(3) != ref[level].size(3):
                 upsampled_flow = F.pad(input=upsampled_flow, pad=[0, 1, 0, 0], mode='replicate')
 
-            flow = self.basic_module[level](torch.cat([
-                ref[level],
-                flow_warp(
-                    supp[level], upsampled_flow.permute(0, 2, 3, 1), interp_mode='bilinear', padding_mode='border'),
-                upsampled_flow
-            ], 1)) + upsampled_flow
+            if sys.platform != "darwin":
+                flow = self.basic_module[level](torch.cat([
+                    ref[level],
+                    flow_warp(
+                        supp[level], upsampled_flow.permute(0, 2, 3, 1), interp_mode='bilinear', padding_mode='border'),
+                    upsampled_flow
+                ], 1)) + upsampled_flow
+            else:
+                flow = self.basic_module[level](torch.cat([
+                    ref[level],
+                    flow_warp(
+                        supp[level], upsampled_flow.permute(0, 2, 3, 1), interp_mode='bilinear'),
+                    upsampled_flow
+                ], 1)) + upsampled_flow
 
         return flow
 
