@@ -70,6 +70,7 @@ class SpyNet(nn.Module):
                 upsampled_flow = F.pad(input=upsampled_flow, pad=[0, 1, 0, 0], mode='replicate')
 
             if sys.platform != "darwin":
+                print("Not Mac")
                 flow = self.basic_module[level](torch.cat([
                     ref[level],
                     flow_warp(
